@@ -1,0 +1,187 @@
+/*
+ * Design tokens — primitive → semantic → component.
+ * Theme "ศาลเจ้ายามค่ำ" (shrine at night): crimson-black lacquer, vermilion pillars,
+ * gold leaf, candle amber and incense-smoke ivory. The public site is dark by default;
+ * `.paper` switches a region to the light parchment scheme (used by admin and forms).
+ */
+
+/* ---------- Primitive ---------- */
+:root {
+	--night-950: #120406;
+	--night-900: #1c070a;
+	--night-800: #2a0b0f;
+	--night-700: #3c1218;
+	--night-600: #561b22;
+	--lacquer-600: #a3141f;
+	--lacquer-500: #c8202c;
+	--lacquer-300: #e8606a;
+	--gold-200: #fbe7a9;
+	--gold-300: #f6d88b;
+	--gold-400: #e9be62;
+	--gold-500: #d4a341;
+	--gold-700: #8f6420;
+	--ember-500: #ff7a2e;
+	--smoke-50: #fbf6ee;
+	--smoke-200: #e9dccb;
+	--smoke-400: #c7ad9a;
+	--parchment-50: #fdf8ee;
+	--parchment-100: #f6ead2;
+	--parchment-200: #ead7b2;
+	--ink-900: #1c1110;
+	--ink-500: #6d5a52;
+	--white: #ffffff;
+
+	/* Legacy aliases still referenced by a few components. */
+	--ink-950: var(--night-950);
+	--ink-800: var(--night-800);
+	--cream-50: var(--smoke-50);
+	--lantern-500: var(--lacquer-500);
+	--lantern-600: var(--lacquer-600);
+
+	--gold-text: linear-gradient(180deg, #fff4d2 0%, #f6d98e 38%, #e2b458 72%, #c99236 100%);
+	--gold-grad: linear-gradient(120deg, #fff1c2 0%, #f1cb73 22%, #b8862f 48%, #f6d88b 70%, #c69538 100%);
+	--lacquer-grad: linear-gradient(160deg, #c8202c 0%, #7d0f18 100%);
+
+	/* One typeface for the whole site: Charm (Thai/Latin). Chinese falls back to a serif CJK face. */
+	/* Typography: Charm is decoration only (hero, h1/h2). Everything people must read uses
+	   Noto Sans Thai; sub-headings use Noto Serif Thai. Chinese gets its own Noto SC faces. */
+	--font-display: 'Charm', 'Noto Serif SC', serif;
+	--font-head: 'Noto Sans Thai', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+	--font-body: 'Noto Sans Thai', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+	--font-mono: var(--font-body);
+
+	/* Type scale (names match values). 16px is the floor for any text people read;
+	   --text-caption (14px) is only for sans captions such as photo credits. */
+	--text-caption: 0.875rem;
+	--text-small: 1rem;
+	--text-body: 1.125rem;
+	--text-lead: 1.25rem;
+	--text-title: 1.375rem;
+	--text-h4: 1.5rem;
+	--text-h3: 1.75rem;
+	--text-xl: 2rem;
+	--text-2xl: 2.75rem;
+	--text-3xl: 3.75rem;
+
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 24px;
+	--space-6: 32px;
+	--space-7: 56px;
+	--space-8: 88px;
+
+	--radius-1: 10px;
+	--radius-s: 10px;
+	--radius-m: 18px;
+	--radius-l: 28px;
+	--radius-pill: 999px;
+
+	--ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+	--hair: 1px;
+	--rule: 2px;
+}
+
+/* ---------- Semantic: night (default) ---------- */
+:root,
+.dark {
+	--bg: var(--night-950);
+	--bg-raised: var(--night-900);
+	--bg-sunken: var(--night-800);
+	--bg-tint: var(--night-800);
+	--fg: var(--smoke-50);
+	--fg-muted: var(--smoke-300, #cdb9a8);
+	--fg-faint: var(--night-600);
+	--line: rgb(233 190 98 / 0.14);
+	--line-strong: rgb(233 190 98 / 0.32);
+	--brand: var(--gold-400);
+	--brand-strong: var(--gold-300);
+	--brand-soft: rgb(233 190 98 / 0.12);
+	--accent: var(--gold-400);
+	--accent-strong: var(--gold-300);
+	--accent-soft: rgb(233 190 98 / 0.14);
+	--date: var(--lacquer-300);
+	--date-soft: rgb(200 32 44 / 0.2);
+	--ok: #7fc9a6;
+	--ok-soft: rgb(127 201 166 / 0.15);
+	--danger: var(--lacquer-300);
+	--focus: var(--gold-300);
+	--on-photo: var(--smoke-50);
+	--glass: rgb(28 7 10 / 0.6);
+	--glass-solid: rgb(24 6 9 / 0.9); /* bars over moving content: no backdrop blur */
+	--glass-line: rgb(233 190 98 / 0.22);
+	--shadow-1: 0 1px 0 rgb(233 190 98 / 0.08) inset, 0 10px 30px rgb(0 0 0 / 0.35);
+	--shadow-2: 0 24px 70px rgb(0 0 0 / 0.55), 0 0 0 1px rgb(233 190 98 / 0.15);
+	--glow: 0 0 40px rgb(233 190 98 / 0.25);
+	--leading-body: 1.65;
+	--leading-tight: 1.15;
+	--measure: 68ch;
+	color-scheme: dark;
+}
+.dark {
+	background: var(--bg);
+	color: var(--fg);
+}
+
+/* ---------- Semantic: parchment (light) ---------- */
+.paper {
+	--bg: var(--parchment-50);
+	--bg-raised: var(--white);
+	--bg-sunken: var(--parchment-100);
+	--bg-tint: var(--parchment-100);
+	--fg: var(--ink-900);
+	--fg-muted: var(--ink-500);
+	--fg-faint: var(--parchment-200);
+	--line: var(--parchment-200);
+	--line-strong: #d9c093;
+	--brand: var(--lacquer-600);
+	--brand-strong: var(--lacquer-500);
+	--brand-soft: #fbe3e4;
+	--accent: var(--lacquer-600);
+	--accent-strong: var(--lacquer-500);
+	--accent-soft: #fbe3e4;
+	--date: var(--lacquer-600);
+	--date-soft: #fbe3e4;
+	--ok: #2e8a66;
+	--ok-soft: #dff2ea;
+	--danger: var(--lacquer-600);
+	--focus: var(--gold-500);
+	--glass: rgb(255 255 255 / 0.75);
+	--glass-solid: rgb(255 255 255 / 0.94);
+	--glass-line: rgb(28 17 16 / 0.08);
+	--shadow-1: 0 1px 2px rgb(28 17 16 / 0.06), 0 8px 24px rgb(28 17 16 / 0.06);
+	--shadow-2: 0 12px 48px rgb(28 17 16 / 0.16);
+	--glow: none;
+	color-scheme: light;
+	background: var(--bg);
+	color: var(--fg);
+}
+
+/* ---------- Component ---------- */
+:root,
+.dark,
+.paper {
+	--btn-bg: var(--accent);
+	--btn-fg: var(--night-950);
+	--btn-bg-hover: var(--brand-strong);
+	--btn-quiet-fg: var(--fg);
+	--btn-quiet-line: var(--line-strong);
+	--field-bg: var(--bg-raised);
+	--field-line: var(--line-strong);
+	--field-line-focus: var(--accent);
+	--card-bg: var(--bg-raised);
+	--card-radius: var(--radius-l);
+	--header-bg: var(--glass);
+}
+.paper {
+	--btn-fg: var(--white);
+}
+
+/* Phones: one tighter vertical rhythm for every section. */
+@media (max-width: 699px) {
+	:root {
+		--space-7: 40px;
+		--space-8: 56px;
+	}
+}
