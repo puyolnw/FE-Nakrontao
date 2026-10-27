@@ -71,6 +71,26 @@ export interface Shop {
 	link: string;
 	images: string[];
 	published: boolean;
+	price_from: number | null;
+	price_to: number | null;
+	price_unit: I18n | null;
+	how_to_buy: I18n | null;
+	story: I18n | null;
+	ships: boolean;
+	sellers: Seller[];
+}
+
+/** A household or shop selling a product. Everything here is public, entered with consent. */
+export interface Seller {
+	name: string;
+	village: string;
+	phone: string;
+	line: string;
+	wechat: string;
+	hours: string;
+	lat: number | null;
+	lon: number | null;
+	note: I18n | null;
 }
 
 export interface News {
