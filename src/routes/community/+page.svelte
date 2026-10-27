@@ -1,24 +1,14 @@
 <script lang="ts">
-	import Footprints from '@lucide/svelte/icons/footprints';
-	import Phone from '@lucide/svelte/icons/phone';
-	import ExternalLink from '@lucide/svelte/icons/external-link';
-	import Shirt from '@lucide/svelte/icons/shirt';
-	import Sun from '@lucide/svelte/icons/sun';
-	import ShoppingBasket from '@lucide/svelte/icons/shopping-basket';
-	import Wheat from '@lucide/svelte/icons/wheat';
-	import Leaf from '@lucide/svelte/icons/leaf';
-	import UtensilsCrossed from '@lucide/svelte/icons/utensils-crossed';
-	import House from '@lucide/svelte/icons/house';
-	import Flame from '@lucide/svelte/icons/flame';
-	import HandHeart from '@lucide/svelte/icons/hand-heart';
+	import ChevronRight from '@lucide/svelte/icons/chevron-right';
 	import Store from '@lucide/svelte/icons/store';
-	import Package from '@lucide/svelte/icons/package';
+	import Truck from '@lucide/svelte/icons/truck';
 	import { photos } from '#lib/photos.ts';
 	import PageHead from '#lib/components/PageHead.svelte';
 	import { t, tr, fmtDate } from '#lib/i18n.svelte.ts';
 	import { resource } from '#lib/resource.svelte.ts';
 	import { site } from '#lib/settings.svelte.ts';
-	import { directionsUrl, paragraphs, safeUrl, youtubeId } from '#lib/util.ts';
+	import { paragraphs, safeUrl, youtubeId } from '#lib/util.ts';
+	import { iconFor, kindLabel, priceText, sellerCount } from '#lib/shop.ts';
 	import Status from '#lib/components/Status.svelte';
 	import type { I18n, News, Shop } from '#lib/types.ts';
 
@@ -28,29 +18,9 @@
 	let kind = $state<string>('');
 
 	const L = (v: I18n) => tr(v);
-	const kindLabel: Record<string, I18n> = {
-		product: { th: 'ผลิตภัณฑ์', zh: '特产', en: 'Product' },
-		food: { th: 'ร้านอาหาร', zh: '餐饮', en: 'Food' },
-		stay: { th: 'ที่พัก', zh: '住宿', en: 'Stay' },
-		shop: { th: 'ร้านค้า/บริการ', zh: '商店/服务', en: 'Shop & service' }
-	};
 	const kinds = $derived([...new Set((shops.data ?? []).map((s) => s.kind))]);
 	const list = $derived((shops.data ?? []).filter((s) => !kind || s.kind === kind));
-
-	// A product-specific icon until the community supplies real photos.
-	function iconFor(s: Shop) {
-		const n = s.name.th ?? '';
-		if (/ผ้า|ไหม/.test(n)) return Shirt;
-		if (/หมวก/.test(n)) return Sun;
-		if (/จักสาน|ไผ่/.test(n)) return ShoppingBasket;
-		if (/ข้าว/.test(n)) return Wheat;
-		if (/สมุนไพร/.test(n)) return Leaf;
-		if (/สักการะ|ธูป/.test(n)) return Flame;
-		if (/กิจกรรม|เรียน/.test(n)) return HandHeart;
-		return { food: UtensilsCrossed, stay: House, shop: Store, product: Package }[s.kind] ?? Package;
-	}
-	const hasSeller = (s: Shop) => !!(s.contact || safeUrl(s.link) || (s.lat !== null && s.lon !== null));
-	const tel = (c: string) => c.replace(/[^\d+]/g, '');
+	const img = (s: Shop) => safeUrl(s.images[0])?.replace(/([?&])w=\d+/, '$1w=720');
 </script>
 
 <PageHead n={7} section={t('nav.community')} title={t('community.title')} lead={t('lead.community')} art="food" photo={photos.community} />
@@ -70,29 +40,34 @@
 		<ul class="prods">
 			{#each list as s (s.id)}
 				{@const Icon = iconFor(s)}
-				<li class="prod">
-					<div class="media">
-						{#if safeUrl(s.images[0])}
-							<img src={safeUrl(s.images[0])?.replace(/([?&])w=\d+/, '$1w=720')} alt={tr(s.name)} loading="lazy" decoding="async" />
-						{:else}
-							<div class="motif" aria-hidden="true"><span class="ring"><Icon size={44} strokeWidth={1.4} /></span></div>
-						{/if}
-						<span class="kind">{L(kindLabel[s.kind] ?? kindLabel.shop)}</span>
-					</div>
-					<div class="body">
-						<h3>{tr(s.name)}</h3>
-						{#if tr(s.products)}<p class="what">{tr(s.products)}</p>{/if}
-						<p class="desc">{tr(s.description)}</p>
-						<div class="foot">
-							{#if hasSeller(s)}
-								{#if s.contact}<a class="act" href="tel:{tel(s.contact)}"><Phone size={16} /> {s.contact}</a>{/if}
-								{#if safeUrl(s.link)}<a class="act" href={safeUrl(s.link)} target="_blank" rel="noopener noreferrer nofollow"><ExternalLink size={16} /> {new URL(safeUrl(s.link)!, location.href).hostname.replace(/^www\./, '')}</a>{/if}
-								{#if s.lat !== null && s.lon !== null}<a class="act" href={directionsUrl(s.lat, s.lon, 'walking')} target="_blank" rel="noopener noreferrer"><Footprints size={16} /> {t('place.walk')}</a>{/if}
+				{@const n = sellerCount(s)}
+				<li>
+					<a class="prod" href="/community/{s.id}">
+						<div class="media">
+							{#if img(s)}
+								<img src={img(s)} alt={tr(s.name)} loading="lazy" decoding="async" />
 							{:else}
-								<span class="pending"><span class="dot"></span>{L({ th: 'รอข้อมูลผู้ขายจากชุมชน', zh: '卖家信息收集中', en: 'Seller details coming soon' })}</span>
+								<div class="motif" aria-hidden="true"><span class="ring"><Icon size={44} strokeWidth={1.4} /></span></div>
 							{/if}
+							<span class="kind">{L(kindLabel[s.kind] ?? kindLabel.shop)}</span>
+							{#if s.images.length > 1}<span class="count">{s.images.length} {L({ th: 'ภาพ', zh: '张', en: 'photos' })}</span>{/if}
 						</div>
-					</div>
+						<div class="body">
+							<h3>{tr(s.name)}</h3>
+							{#if priceText(s)}<p class="price">{priceText(s)}</p>{/if}
+							{#if tr(s.products)}<p class="what">{tr(s.products)}</p>{/if}
+							<p class="desc">{tr(s.description)}</p>
+							<div class="foot">
+								{#if n}
+									<span class="sellers"><span class="dot on"></span>{n} {L({ th: 'ผู้ขาย', zh: '位卖家', en: n > 1 ? 'sellers' : 'seller' })}</span>
+								{:else}
+									<span class="pending"><span class="dot"></span>{L({ th: 'รอข้อมูลผู้ขาย', zh: '卖家信息收集中', en: 'Seller details soon' })}</span>
+								{/if}
+								{#if s.ships}<span class="ship"><Truck size={15} /> {L({ th: 'ส่งได้', zh: '可邮寄', en: 'Ships' })}</span>{/if}
+								<span class="more">{L({ th: 'ดูรายละเอียด', zh: '查看详情', en: 'Details' })} <ChevronRight size={16} /></span>
+							</div>
+						</div>
+					</a>
 				</li>
 			{/each}
 		</ul>
@@ -168,7 +143,13 @@
 			grid-template-columns: repeat(3, minmax(0, 1fr));
 		}
 	}
+	.prods > li {
+		display: flex;
+	}
 	.prod {
+		width: 100%;
+		color: inherit;
+		text-decoration: none;
 		display: flex;
 		flex-direction: column;
 		border-radius: var(--radius-l);
@@ -179,7 +160,8 @@
 			transform 400ms var(--ease-out),
 			box-shadow 400ms var(--ease-out);
 	}
-	.prod:hover {
+	.prod:hover,
+	.prod:focus-visible {
 		transform: translateY(-4px);
 		box-shadow: inset 0 0 0 1px var(--line-strong), var(--shadow-1);
 	}
@@ -193,6 +175,25 @@
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		transition: transform 700ms var(--ease-out);
+	}
+	.prod:hover .media img {
+		transform: scale(1.05);
+	}
+	.count {
+		position: absolute;
+		right: var(--space-3);
+		bottom: var(--space-3);
+		padding: 2px 10px;
+		border-radius: var(--radius-pill);
+		background: var(--glass-solid);
+		font-size: var(--text-caption);
+	}
+	.price {
+		margin: 0;
+		color: var(--gold-300);
+		font-size: var(--text-lead);
+		font-weight: 600;
 	}
 	.motif {
 		position: absolute;
@@ -263,26 +264,33 @@
 		border-top: 1px solid var(--line);
 		display: flex;
 		flex-wrap: wrap;
+		align-items: center;
+		min-height: 44px;
 		gap: var(--space-2) var(--space-4);
 		font-size: var(--text-small);
 	}
-	.act {
+	.sellers,
+	.ship {
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
-		min-height: 44px;
-		color: var(--accent);
-		text-decoration: none;
+		color: var(--fg);
 	}
-	.act:hover {
+	.more {
+		margin-left: auto;
+		display: inline-flex;
+		align-items: center;
+		gap: 2px;
+		color: var(--accent);
+		font-weight: 500;
+	}
+	.prod:hover .more {
 		color: var(--accent-strong);
-		text-decoration: underline;
 	}
 	.pending {
 		display: inline-flex;
 		align-items: center;
 		gap: 8px;
-		min-height: 44px;
 		color: var(--fg-muted);
 	}
 	.dot {
@@ -291,6 +299,10 @@
 		border-radius: 50%;
 		background: var(--gold-500);
 		box-shadow: 0 0 0 4px rgb(212 163 65 / 0.18);
+	}
+	.dot.on {
+		background: var(--ok);
+		box-shadow: 0 0 0 4px var(--ok-soft);
 	}
 	.join {
 		margin-top: var(--space-6);

@@ -27,7 +27,7 @@
 		const p = place.data;
 		if (!p) return [];
 		const ps = (all.data ?? []).filter((x) => x.id !== p.id).map((x) => ({ name: tr(x.name), href: `/places/${x.id}`, km: haversineKm(p.lat, p.lon, x.lat, x.lon), kind: tx(`cat.${x.category}`) }));
-		const ss = (shops.data ?? []).filter((s) => s.lat !== null && s.lon !== null).map((s) => ({ name: tr(s.name), href: '/community', km: haversineKm(p.lat, p.lon, s.lat!, s.lon!), kind: tx(`cat.${s.kind === 'product' || s.kind === 'shop' ? 'community' : s.kind}`) }));
+		const ss = (shops.data ?? []).filter((s) => s.lat !== null && s.lon !== null).map((s) => ({ name: tr(s.name), href: `/community/${s.id}`, km: haversineKm(p.lat, p.lon, s.lat!, s.lon!), kind: tx(`cat.${s.kind === 'product' || s.kind === 'shop' ? 'community' : s.kind}`) }));
 		return [...ps, ...ss].filter((x) => x.km <= 5).sort((a, b) => a.km - b.km).slice(0, 8);
 	});
 	const filled = (v: string | null | undefined) => !!v && !/^[\s\-–—]*$/.test(v);

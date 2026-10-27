@@ -35,6 +35,13 @@
 	const fromLocal = (s: string) => (s ? new Date(s).toISOString() : null);
 
 	let tagDraft = $state('');
+
+	// One seller row; keys must match the Go Seller struct exactly (strict decoder).
+	type SellerRow = { name: string; village: string; phone: string; line: string; wechat: string; hours: string; lat: number | null; lon: number | null; note: I18n | null };
+	const blankSeller = (): SellerRow => ({ name: '', village: '', phone: '', line: '', wechat: '', hours: '', lat: null, lon: null, note: null });
+	const sellers = () => list() as SellerRow[];
+	const setSeller = (i: number, patch: Partial<SellerRow>) => (value = sellers().map((s, j) => (j === i ? { ...s, ...patch } : s)));
+	const num = (v: string) => (v.trim() === '' ? null : Number(v));
 	const list = () => (Array.isArray(value) ? (value as unknown[]) : []);
 	const i18n = () => (value ?? {}) as I18n;
 </script>
@@ -118,6 +125,31 @@
 			<option value="">—</option>
 			{#each places as p (p.id)}<option value={p.id}>{p.name.th}</option>{/each}
 		</select>
+	{:else if field.type === 'sellers'}
+		{#if field.help}<span class="help">{field.help}</span>{/if}
+		<ol class="sellers">
+			{#each sellers() as sl, i (i)}
+				<li>
+					<div class="sgrid">
+						<label>ชื่อร้าน / ครัวเรือน *<input value={sl.name} oninput={(e) => setSeller(i, { name: e.currentTarget.value })} /></label>
+						<label>หมู่ที่<input value={sl.village} oninput={(e) => setSeller(i, { village: e.currentTarget.value })} /></label>
+						<label>โทร<input type="tel" value={sl.phone} oninput={(e) => setSeller(i, { phone: e.currentTarget.value })} /></label>
+						<label>LINE ID<input value={sl.line} oninput={(e) => setSeller(i, { line: e.currentTarget.value })} /></label>
+						<label>WeChat ID<input value={sl.wechat} oninput={(e) => setSeller(i, { wechat: e.currentTarget.value })} /></label>
+						<label>เวลาขาย / เปิด<input value={sl.hours} placeholder="เช่น ทุกวัน 08:00–17:00" oninput={(e) => setSeller(i, { hours: e.currentTarget.value })} /></label>
+						<label>ละติจูด<input type="number" step="0.000001" min="-90" max="90" value={sl.lat ?? ''} oninput={(e) => setSeller(i, { lat: num(e.currentTarget.value) })} /></label>
+						<label>ลองจิจูด<input type="number" step="0.000001" min="-180" max="180" value={sl.lon ?? ''} oninput={(e) => setSeller(i, { lon: num(e.currentTarget.value) })} /></label>
+						<label class="wide">หมายเหตุ (ไทย)<input value={sl.note?.th ?? ''} oninput={(e) => setSeller(i, { note: { ...(sl.note ?? {}), th: e.currentTarget.value } })} /></label>
+						<label class="wide">หมายเหตุ (中文)<input value={sl.note?.zh ?? ''} oninput={(e) => setSeller(i, { note: { ...(sl.note ?? { th: '' }), zh: e.currentTarget.value } })} /></label>
+					</div>
+					<div class="inline">
+						<button type="button" class="btn quiet small" disabled={i === 0} onclick={() => { const a = [...sellers()]; [a[i - 1], a[i]] = [a[i], a[i - 1]]; value = a; }}>↑ เลื่อนขึ้น</button>
+						<button type="button" class="btn danger small" onclick={() => (value = sellers().filter((_, j) => j !== i))}>ลบผู้ขาย</button>
+					</div>
+				</li>
+			{/each}
+		</ol>
+		<button type="button" class="btn quiet small" onclick={() => (value = [...sellers(), blankSeller()])}>+ เพิ่มผู้ขาย</button>
 	{:else if field.type === 'places'}
 		<ol class="order">
 			{#each list() as id, i (i)}
@@ -209,5 +241,32 @@
 		align-items: center;
 		gap: var(--space-2);
 		padding: var(--space-1) 0;
+	}
+	.sellers {
+		list-style: none;
+		margin: 0 0 8px;
+		padding: 0;
+		display: grid;
+		gap: 12px;
+	}
+	.sellers > li {
+		border: 1px solid var(--line-strong);
+		border-radius: 10px;
+		padding: 12px;
+		display: grid;
+		gap: 8px;
+	}
+	.sgrid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 8px 12px;
+	}
+	.sgrid label {
+		display: grid;
+		gap: 4px;
+		font-size: 0.9rem;
+	}
+	.sgrid .wide {
+		grid-column: 1 / -1;
 	}
 </style>

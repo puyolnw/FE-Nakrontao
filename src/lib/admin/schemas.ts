@@ -10,7 +10,8 @@ export type Field =
 	| { key: string; label: string; type: 'tags' | 'images' }
 	| { key: string; label: string; type: 'datetime'; required?: boolean; nullable?: boolean }
 	| { key: string; label: string; type: 'places' }
-	| { key: string; label: string; type: 'place' };
+	| { key: string; label: string; type: 'place' }
+	| { key: string; label: string; type: 'sellers'; help?: string };
 
 export interface Schema {
 	path: string; // API path segment
@@ -169,9 +170,18 @@ export const schemas: Record<string, Schema> = {
 			{ key: 'contact', label: 'โทร/ช่องทางติดต่อ', type: 'text' },
 			{ key: 'link', label: 'ลิงก์', type: 'url' },
 			{ key: 'images', label: 'รูปภาพ', type: 'images' },
+			{ key: 'price_from', label: 'ราคาเริ่มต้น (บาท)', type: 'number', min: 0, step: 1 },
+			{ key: 'price_to', label: 'ราคาสูงสุด (บาท)', type: 'number', min: 0, step: 1 },
+			{ key: 'price_unit', label: 'หน่วยราคา (เช่น ผืน ใบ กก. ชุด)', type: 'i18n' },
+			{ key: 'ships', label: 'ส่งทางไปรษณีย์ได้', type: 'bool' },
+			{ key: 'how_to_buy', label: 'วิธีซื้อ (มาซื้อที่บ้าน สั่งล่วงหน้า ขายหน้าศาลช่วงงาน ฯลฯ)', type: 'i18n', long: true },
+			{ key: 'story', label: 'เรื่องเล่าจากผู้ผลิต', type: 'i18n', long: true },
+			{ key: 'sellers', label: 'ผู้ขาย / ครัวเรือน', type: 'sellers', help: 'ใส่เฉพาะผู้ที่ยินยอมให้เผยแพร่ชื่อ เบอร์ และพิกัดแล้ว ข้อมูลทั้งหมดแสดงบนเว็บ' },
 			{ key: 'published', label: 'เผยแพร่', type: 'bool' }
 		],
-		defaults: { name: { th: '' }, kind: 'shop', products: { th: '' }, description: { th: '' }, lat: null, lon: null, contact: '', link: '', images: [], published: true }
+		defaults: { name: { th: '' }, kind: 'shop', products: { th: '' }, description: { th: '' }, lat: null, lon: null, contact: '', link: '', images: [], published: true, price_from: null, price_to: null, price_unit: null, how_to_buy: null, story: null, ships: false, sellers: [] },
+		qr: true,
+		publicPath: '/community'
 	},
 	news: {
 		path: 'news',
