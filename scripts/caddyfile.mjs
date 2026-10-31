@@ -27,11 +27,6 @@ const csp = [
 const caddyfile = `{
 	admin off
 	auto_https off
-	servers {
-		# Railway's edge sits in front; take the client address from X-Forwarded-For, right to left.
-		trusted_proxies static 0.0.0.0/0 ::/0
-		trusted_proxies_strict
-	}
 }
 
 :{$PORT:8080} {
@@ -53,8 +48,11 @@ const caddyfile = `{
 	# The API answers with its own headers; the browser only ever sees this one origin.
 	@backend path /api/* /uploads/*
 	handle @backend {
+		# Railway's edge sets X-Real-IP to the visitor's address. Replacing X-Forwarded-For with it means the
+		# client cannot pick its own address, so per-visitor rate limits apply to each visitor.
 		reverse_proxy {$API_URL} {
 			header_up Host {upstream_hostport}
+			header_up X-Forwarded-For {http.request.header.X-Real-IP}
 		}
 	}
 
