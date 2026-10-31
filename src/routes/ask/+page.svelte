@@ -56,10 +56,6 @@
 		api.post(`/api/v1/chat/${a.id}/feedback`, { session_id: sessionId, helpful }).catch(() => {});
 	}
 
-	$effect(() => {
-		if (page.url.searchParams.get('q')) send();
-	});
-
 	const examples = $derived([t('ask.ex1'), t('ask.ex2'), t('ask.ex3')]);
 	// Citation links are built from doc codes only; the model's text never becomes a link (threat A3).
 	const uniqueCites = (a: ChatAnswer) => [...new Map(a.citations.map((c) => [c.doc_code, c])).values()];
