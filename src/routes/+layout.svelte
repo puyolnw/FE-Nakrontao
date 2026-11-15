@@ -5,6 +5,8 @@
 	import { afterNavigate, onNavigate } from '$app/navigation';
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import Header from '#lib/components/Header.svelte';
+	import ChatWidget from '#lib/components/ChatWidget.svelte';
+	import { openChat } from '#lib/chat.svelte.ts';
 	import { i18n, t, tr, type Key } from '#lib/i18n.svelte.ts';
 	import { loadSettings, site } from '#lib/settings.svelte.ts';
 	import { refreshTriggers, scrollTop, splitReveal, startSmoothScroll } from '#lib/motion.ts';
@@ -45,6 +47,20 @@
 			body: JSON.stringify({ path, lang: i18n.lang }),
 			keepalive: true
 		}).catch(() => {});
+	});
+
+	// The assistant lives in a floating panel on every page, so links to /ask open it in place.
+	function interceptAsk(e: MouseEvent) {
+		if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+		const a = (e.target as Element | null)?.closest?.('a');
+		if (!a || a.target || a.origin !== location.origin || a.pathname !== '/ask') return;
+		e.preventDefault();
+		openChat(new URL(a.href).searchParams.get('q') ?? '');
+	}
+	// Capture phase, so this runs before the SvelteKit router's own link handler.
+	$effect(() => {
+		document.addEventListener('click', interceptAsk, true);
+		return () => document.removeEventListener('click', interceptAsk, true);
 	});
 
 	const explore: { href: string; key: Key }[] = [
@@ -88,6 +104,7 @@
 	<main id="main">
 		{@render children()}
 	</main>
+	<ChatWidget />
 	<footer class="dark">
 		<div class="wrap">
 			<div class="cta">
@@ -103,11 +120,7 @@
 					{:else}
 						<a class="btn accent big" href="/plan">{t('plan.build')} <ArrowUpRight size={18} /></a>
 					{/if}
-					{#if page.url.pathname === '/ask'}
-						<a class="btn quiet big" href="/visit">{t('nav.visit')}</a>
-					{:else}
-						<a class="btn quiet big" href="/ask">{t('nav.ask')}</a>
-					{/if}
+					<button class="btn quiet big" onclick={() => openChat()}>{t('nav.ask')}</button>
 				</div>
 			</div>
 			<div class="cols">
