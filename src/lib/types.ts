@@ -117,6 +117,10 @@ export interface ChatAnswer {
 	citations: Citation[];
 	refused: boolean;
 	latency_ms: number;
+	/** Follow-up questions the visitor can tap to ask next. */
+	suggestions?: string[];
+	/** Question category (history, ritual, event, travel, community, other). */
+	topic?: string;
 }
 
 export interface PlanStop {
