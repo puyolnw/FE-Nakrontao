@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import { i18n, setLang, t, tr, type Key } from '#lib/i18n.svelte.ts';
 	import { site } from '#lib/settings.svelte.ts';
 	import { chrome } from '#lib/chrome.svelte.ts';
@@ -9,7 +8,6 @@
 	import House from '@lucide/svelte/icons/house';
 	import MapPin from '@lucide/svelte/icons/map-pin';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
-	import MessageCircle from '@lucide/svelte/icons/message-circle';
 	import ChevronDown from '@lucide/svelte/icons/chevron-down';
 
 	// Five primary destinations; the rest live under "More" so the bar stays scannable.
@@ -29,8 +27,7 @@
 	const tabs = [
 		{ href: '/', key: 'nav.home' as Key, icon: House, owns: ['/'] },
 		{ href: '/visit', key: 'nav.visit' as Key, icon: MapPin, owns: ['/visit', '/places'] },
-		{ href: '/wish', key: 'nav.wish' as Key, icon: Sparkles, owns: ['/wish'] },
-		{ href: '/ask', key: 'nav.ask' as Key, icon: MessageCircle, owns: ['/ask'] }
+		{ href: '/wish', key: 'nav.wish' as Key, icon: Sparkles, owns: ['/wish'] }
 	];
 	const tabOn = (owns: string[]) => owns.some((h) => current(h));
 	let moreEl = $state<HTMLDetailsElement>();
@@ -93,7 +90,6 @@
 				<button class:on={i18n.lang === l.code} aria-pressed={i18n.lang === l.code} onclick={() => setLang(l.code)}>{l.label}</button>
 			{/each}
 		</div>
-		<a class="ask" class:here={current('/ask')} href="/ask" aria-label={t('nav.ask')} title={t('nav.ask')}><span class="ask-ic"><MessageCircle size={18} /></span>{t('nav.ask')} <span class="ask-arrow"><ArrowUpRight size={16} /></span></a>
 		<button class="burger" aria-expanded={open} aria-controls="overlay-nav" aria-label={t('nav.menu')} onclick={() => (open = !open)}>
 			<span></span><span></span>
 		</button>
@@ -103,7 +99,7 @@
 <!-- Full-screen menu on small screens. -->
 <div id="overlay-nav" class="overlay dark" class:open aria-hidden={!open}>
 	<nav aria-label={t('nav.menu')}>
-		{#each [...links, ...more, { href: '/ask', key: 'nav.ask' as Key }] as l, i (l.href)}
+		{#each [...links, ...more] as l, i (l.href)}
 			<a href={l.href} style:--i={i} tabindex={open ? 0 : -1}>
 				<span class="n">{String(i + 1).padStart(2, '0')}</span>{t(l.key)}
 			</a>
@@ -235,23 +231,6 @@
 		background: rgb(241 198 106 / 0.16);
 		color: var(--gold-300);
 		box-shadow: inset 0 0 0 1px rgb(241 198 106 / 0.45);
-	}
-	.ask {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		padding: 10px 18px;
-		border-radius: var(--radius-pill);
-		background: var(--gold-grad);
-		color: var(--night-950);
-		font-family: var(--font-body);
-		font-size: var(--text-small);
-		font-weight: 500;
-		white-space: nowrap;
-	}
-	.ask:hover {
-		color: var(--night-950);
-		box-shadow: var(--glow);
 	}
 	.burger {
 		display: none;
@@ -399,7 +378,7 @@
 			bottom: 0;
 			z-index: 998;
 			display: grid;
-			grid-template-columns: repeat(4, 1fr);
+			grid-template-columns: repeat(3, 1fr);
 			gap: 0;
 			padding: 6px 6px calc(6px + env(safe-area-inset-bottom));
 			background: rgb(20 5 8 / 0.96);
@@ -450,14 +429,6 @@
 		}
 	}
 	@media (min-width: 1024px) and (max-width: 1199px) {
-		.ask {
-			font-size: 0;
-			gap: 0;
-			width: 44px;
-			height: 44px;
-			padding: 0;
-			justify-content: center;
-		}
 		nav.main a,
 		.more summary {
 			padding-inline: 10px;
@@ -467,26 +438,8 @@
 		}
 	}
 	@media (max-width: 899px) {
-		.ask {
-			display: none;
-		}
 		.brand strong {
 			font-size: var(--text-small);
-		}
-	}
-	.ask.here {
-		display: none !important;
-	}
-	.ask-ic {
-		display: none;
-	}
-	@media (min-width: 1024px) and (max-width: 1199px) {
-		.ask-ic {
-			display: inline-grid;
-			place-items: center;
-		}
-		.ask-arrow {
-			display: none;
 		}
 	}
 </style>

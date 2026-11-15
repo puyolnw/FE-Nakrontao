@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { openChat } from '#lib/chat.svelte.ts';
 	import { goto } from '$app/navigation';
 	import ArrowUpRight from '@lucide/svelte/icons/arrow-up-right';
 	import Sparkles from '@lucide/svelte/icons/sparkles';
@@ -48,7 +49,7 @@
 	let q = $state('');
 	function ask(e: SubmitEvent) {
 		e.preventDefault();
-		if (q.trim()) goto(`/ask?q=${encodeURIComponent(q.trim())}`);
+		if (q.trim()) openChat(q);
 	}
 
 	let now = $state(Date.now());
